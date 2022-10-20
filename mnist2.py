@@ -9,7 +9,7 @@ def main():
     nr_correct = 0
     epochs = 50
     hidden = 128
-    momentum_value = 0.0
+    momentum_value = 0.3
     batch = 1000
 
 
@@ -34,7 +34,7 @@ def main():
     X_train_batch = X_train[sample:sample+batch]
     labels_train_batch = labels[sample:sample+batch]
 
-    accuracies, val_accuracies  = [] , []
+    test_accuracies, val_accuracies  = [] , []
     for epoch in range(epochs):
         for digit, truth_vector in zip(X_train_batch, labels_train_batch):
             #convert to vector
@@ -56,10 +56,6 @@ def main():
             e = 1 / len(out) * np.sum((out - truth_vector) ** 2, axis=0)
             nr_correct += int(category == g_truth)
 
-            # #compute accuracy and append to the plot
-            # accuracy = nr_correct/count
-            # pyplot.plot(accuracy)
-
             # Backpropagation output -> hidden (cost function derivative)
             delta_out = out - truth_vector
             ho_weight += -learn_rate * delta_out @ np.transpose(h) 
@@ -77,14 +73,21 @@ def main():
             bias_ih += -learn_rate * delta_h 
             bias_ih += momentum_value * (-learn_rate * delta_h )
 
+
+
+
+
         # Show accuracy for this epoch
         # print(f"Acc: {round((nr_correct / X_train.shape[0]) * 100, 2)}%")
-        print(f"Acc: {round((nr_correct / batch) * 100, 2)}%")
+        print(f"Epoch: {epoch}  |   Acc: {round((nr_correct / batch) * 100, 2)}% ")
+        test_accuracies.append(nr_correct / batch)
         nr_correct = 0
-    #     pyplot.ylim(-0.1, 1.1)
-    #     pyplot.xlim(0, epochs)
-        
-    # pyplot.show()
+
+
+    pyplot.ylim(0, 1)
+    pyplot.xlim(0, epochs)
+    pyplot.plot(accuracies)
+    pyplot.show()
 
 # #Sigmoid funstion
 # def sigmoid(x):
