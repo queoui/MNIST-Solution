@@ -86,7 +86,7 @@ def main():
 
     pyplot.ylim(0, 1)
     pyplot.xlim(0, epochs)
-    pyplot.plot(accuracies)
+    pyplot.plot(test_accuracies)
     pyplot.show()
 
 # #Sigmoid funstion
