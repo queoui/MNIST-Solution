@@ -5,12 +5,12 @@ from matplotlib import pyplot
 def main():
 
     #experiment variables
-    learn_rate = 0.01
+    learn_rate = 0.1
     nr_correct = 0
-    epochs = 3
+    epochs = 50
     hidden = 128
-    momentum_value = 0.1
-    batch = 500
+    momentum_value = 0.0
+    batch = 1000
 
 
     #load and preprocess data
@@ -29,16 +29,14 @@ def main():
     bias_ih = np.random.uniform(-0.05, 0.05, (hidden, 1))
     bias_ho = np.random.uniform(-0.05, 0.05, (10, 1))
 
-    sample = np.random.randint(0, X_train.shape[0], size = (batch))
-    x_train_batch = X_train[sample].reshape((-1, 784))
-    x_test_batch = X_test[sample].reshape((-1, 784))
-    y = Y_train[sample]
+    sample = np.random.randint(0, X_train.shape[0])
+
+    X_train_batch = X_train[sample:sample+batch]
+    labels_train_batch = labels[sample:sample+batch]
 
     accuracies, val_accuracies  = [] , []
     for epoch in range(epochs):
-        count = 0
-        for digit, truth_vector in zip(X_train, labels):
-            count+=1
+        for digit, truth_vector in zip(X_train_batch, labels_train_batch):
             #convert to vector
             digit.shape += (1,)
             truth_vector.shape += (1,)
@@ -79,11 +77,9 @@ def main():
             bias_ih += -learn_rate * delta_h 
             bias_ih += momentum_value * (-learn_rate * delta_h )
 
-
-
-
         # Show accuracy for this epoch
-        print(f"Acc: {round((nr_correct / X_train.shape[0]) * 100, 2)}%")
+        # print(f"Acc: {round((nr_correct / X_train.shape[0]) * 100, 2)}%")
+        print(f"Acc: {round((nr_correct / batch) * 100, 2)}%")
         nr_correct = 0
     #     pyplot.ylim(-0.1, 1.1)
     #     pyplot.xlim(0, epochs)
