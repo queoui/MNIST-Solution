@@ -9,16 +9,16 @@ def main():
 
     #experiment variables
     learn_rate = 0.01
-    epochs = 50
+    epochs = 4
     hidden = 128
-    momentum_value = 0.0
+    momentum_value = 0.9
     batch = 1
 
 
     #load and preprocess data
     train_correct = 0
     test_correct = 0
-    count = 0
+    delta_out = np.zeros((10,1), np.float64)
     (X_train, Y_train), (X_test, Y_test ) = mnist.load_data()
     X_train, X_test = np.divide(X_train, 255), np.divide(X_test, 255)
     X_test = X_test.reshape(-1, 784)
@@ -72,26 +72,30 @@ def main():
             g_truth = np.argmax(truth_vector)
             
 
-            # Cost / Error calculation
-            e = 1 / len(out) * np.sum((out - truth_vector) ** 2, axis=0)
             train_correct += int(category == g_truth)
 
-            # Backpropagation output -> hidden (cost function derivative)
-            delta_out = out - truth_vector
-            ho_weight += -learn_rate * delta_out @ np.transpose(h) 
-            ho_weight += (momentum_value * -learn_rate * delta_out @ np.transpose(h))
 
-            bias_ho += -learn_rate * delta_out
+            # Backpropagation output -> hidden (cost function derivative)
+
+            ho_weight += (momentum_value * (-learn_rate * delta_out @ np.transpose(h)))
             bias_ho += (momentum_value *(-learn_rate * delta_out))
+
+            delta_out = out - truth_vector
+
+            ho_weight += -learn_rate * delta_out @ np.transpose(h) 
+            bias_ho += -learn_rate * delta_out
+
 
 
             # Backpropagation hidden -> input (activation function derivative)
+            # ih_weight += (momentum_value *(-learn_rate * delta_h @ np.transpose(digit)))
+            # bias_ih += momentum_value * (-learn_rate * delta_h )
+            
+            # momentum_h = momentum_value * delta_h
             delta_h = np.transpose(ho_weight) @ delta_out * (h * (1 - h))
             ih_weight += -learn_rate * delta_h @ np.transpose(digit) 
-            ih_weight += (momentum_value *(-learn_rate * delta_h @ np.transpose(digit)))
-
             bias_ih += -learn_rate * delta_h 
-            bias_ih += momentum_value * (-learn_rate * delta_h )
+
 
         for digit, truth_vector in zip(X_test, labels_test):
             #convert to vector
@@ -110,7 +114,7 @@ def main():
             g_truth = np.argmax(truth_vector)
 
             # Cost / Error calculation
-            e = 1 / len(out) * np.sum((out - truth_vector) ** 2, axis=0)
+            # e = 1 / len(out) * np.sum((out - truth_vector) ** 2, axis=0)
             test_correct += int(category == g_truth)    
 
             confusion_vector_category.append(category)
@@ -131,22 +135,11 @@ def main():
         confusion = confusion_matrix(cfm_t, cfm_c)
     print(confusion)
 
-
     pyplot.ylim(0, 1)
     pyplot.xlim(0, epochs)
     pyplot.plot(train_accuracies)
     pyplot.plot(test_accuracies)
     pyplot.show()
-
-# #Sigmoid funstion
-# def sigmoid(x):
-#     return 1/(np.exp(-x)+1)
-
-
-# #Softmax
-# def softmax(x):
-#     exp_element=np.exp(x-x.max())
-#     return exp_element/np.sum(exp_element,axis=0)
 
 
 if __name__ == "__main__":
